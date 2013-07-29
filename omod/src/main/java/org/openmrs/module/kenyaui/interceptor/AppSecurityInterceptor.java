@@ -19,20 +19,24 @@ import org.openmrs.api.context.Context;
 import org.openmrs.module.appframework.AppDescriptor;
 import org.openmrs.module.appframework.api.AppFrameworkService;
 import org.openmrs.module.kenyaui.annotation.AppPage;
+import org.openmrs.module.kenyaui.annotation.PublicAction;
 import org.openmrs.module.kenyaui.annotation.PublicPage;
 import org.openmrs.module.kenyaui.annotation.SharedPage;
+import org.openmrs.ui.framework.fragment.FragmentActionRequest;
+import org.openmrs.ui.framework.interceptor.FragmentActionInterceptor;
 import org.openmrs.ui.framework.interceptor.PageRequestInterceptor;
 import org.openmrs.ui.framework.page.PageContext;
 import org.springframework.stereotype.Component;
 
+import java.lang.reflect.Method;
 import java.util.Arrays;
 import java.util.List;
 
 /**
- * Permissions checking interceptor for all UI framework page requests
+ * Permissions checking interceptor for all UI framework page and action requests
  */
 @Component
-public class PermissionCheckPageRequestInterceptor implements PageRequestInterceptor {
+public class AppSecurityInterceptor implements PageRequestInterceptor, FragmentActionInterceptor {
 
 	/**
 	 * @see PageRequestInterceptor#beforeHandleRequest(org.openmrs.ui.framework.page.PageContext)
@@ -75,6 +79,18 @@ public class PermissionCheckPageRequestInterceptor implements PageRequestInterce
 		}
 
 		setRequestApp(context, requestAppId);
+	}
+
+	/**
+	 * @see FragmentActionInterceptor#beforeHandleRequest(org.openmrs.ui.framework.fragment.FragmentActionRequest, java.lang.reflect.Method)
+	 */
+	@Override
+	public void beforeHandleRequest(FragmentActionRequest request, Method controllerMethod) {
+		PublicAction publicAction = controllerMethod.getAnnotation(PublicAction.class);
+
+		if (publicAction == null && !Context.isAuthenticated()) {
+			throw new APIAuthenticationException("Login is required");
+		}
 	}
 
 	/**
