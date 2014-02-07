@@ -195,13 +195,21 @@ var kenyaui = (function(jQuery) {
 			event.preventDefault();
 			var form = jQuery(this);
 
+			// Disable any submit buttons
+			form.find('[type="submit"]').prop('disabled', true);
+
 			// Clear any existing errors
 			_public.clearFormErrors(formId);
 
 			// POST and get back the result as JSON
-			jQuery.post(form.attr('action'), form.serialize(), options.onSuccess, "json").error(function(xhr) {
-				_public.showFormErrors(formId, xhr.responseText);
-			});
+			jQuery.post(form.attr('action'), form.serialize(), options.onSuccess, "json")
+				.error(function(xhr) {
+					_public.showFormErrors(formId, xhr.responseText);
+				})
+				.always(function() {
+					// Re-enable any submit buttons
+					form.find('[type="submit"]').prop('disabled', false);
+				});
 		});
 	};
 
