@@ -26,7 +26,7 @@
 			<%
 			def obss = results[concept]
 			if (obss) {
-				print obss.collect({ obs -> ui.format(obs) }).join("<br />")
+				print obss.collect({ obs -> kenyaui.formatObsWrapper(obs) }).join("<br />")
 			}
 			%>
 		</td>

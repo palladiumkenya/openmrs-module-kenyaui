@@ -32,6 +32,7 @@ import org.openmrs.User;
 import org.openmrs.Visit;
 import org.openmrs.api.context.Context;
 import org.openmrs.module.appframework.domain.AppDescriptor;
+import org.openmrs.module.kenyaui.wrapper.KenyaEMRObsWrapper;
 import org.openmrs.ui.framework.fragment.FragmentActionRequest;
 import org.openmrs.ui.framework.page.PageRequest;
 import org.openmrs.util.OpenmrsUtil;
@@ -40,11 +41,14 @@ import org.springframework.stereotype.Component;
 
 import javax.servlet.http.HttpSession;
 import java.text.DateFormat;
+import java.text.DecimalFormat;
+import java.text.NumberFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
+import java.util.Locale;
 
 /**
  * UI utility methods
@@ -401,5 +405,36 @@ public class KenyaUiUtils {
 	 */
 	protected boolean dateHasTime(Date date) {
 		return !DateUtils.isSameInstant(date, DateUtils.truncate(date, Calendar.DATE));
+	}
+
+	/**
+	 * Formats KenyaEMRObsWrapper so that concept values and units are displayed accurately
+	 * @param o
+	 * @return
+	 */
+	public String formatObsWrapper(KenyaEMRObsWrapper o) {
+
+		if (o == null) {
+			return "";
+		}
+		NumberFormat nf = NumberFormat.getNumberInstance(Context.getLocale());
+		DecimalFormat df = (DecimalFormat) nf;
+		df.applyPattern("#0.0#####"); // formatting style up to 6 digits
+		String formattedValue = null;
+		if (o.getConcept() instanceof ConceptNumeric) {
+			String units = ((ConceptNumeric) o.getConcept()).getUnits();
+
+			ConceptNumeric cn = (ConceptNumeric) o.getConcept();
+			if (cn.isPrecise() != true) {
+				double d = o.getValueNumeric();
+				int i = (int) d;
+				formattedValue =  Integer.toString(i);
+			} else {
+				formattedValue = df.format(o.getValueNumeric());
+			}
+
+			return formattedValue + (org.apache.commons.lang.StringUtils.isNotBlank(units) ? " " + units : "");
+		}
+		return "";
 	}
 }

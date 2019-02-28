@@ -29,6 +29,7 @@ import org.openmrs.api.AdministrationService;
 import org.openmrs.api.ConceptService;
 import org.openmrs.api.context.Context;
 import org.openmrs.module.kenyaui.KenyaUiUtils;
+import org.openmrs.module.kenyaui.wrapper.KenyaEMRObsWrapper;
 import org.openmrs.ui.framework.annotation.FragmentParam;
 import org.openmrs.ui.framework.annotation.SpringBean;
 import org.openmrs.ui.framework.fragment.FragmentModel;
@@ -55,24 +56,25 @@ public class ObsHistoryTableFragmentController {
 
 		//get LDL obs
 		//we want to combine all VL obs together while setting LDL value to that of GP (default value for LDL which is numeric)
-		List<Obs> ldlObs = new ArrayList<Obs>();
-		List<Obs> vlObs = new ArrayList<Obs>();
-		List<Obs> allVls = new ArrayList<Obs>();
+		List<KenyaEMRObsWrapper> ldlObs = new ArrayList<KenyaEMRObsWrapper>();
+		List<KenyaEMRObsWrapper> vlObs = new ArrayList<KenyaEMRObsWrapper>();
+		List<KenyaEMRObsWrapper> allVls = new ArrayList<KenyaEMRObsWrapper>();
 		List<Obs> ldl = Context.getObsService().getObservationsByPersonAndConcept(patient, LDLQuestion);
 
 		for (Obs obs: ldl) {
 			if (obs.getConcept().equals(LDLQuestion) && obs.getValueCoded().equals(LDLAnswer)) {
-				obs.setConcept(vl);
-				obs.setValueNumeric(ldl_default_value);
-				ldlObs.add(obs);
+				KenyaEMRObsWrapper obsw = new KenyaEMRObsWrapper(obs.getObsId(), vl, obs.getObsDatetime(), ldl_default_value);
+				ldlObs.add(obsw);
 			}
 		}
 
 		// get ordinary VL obs
 		List<Obs> vlObss =  Context.getObsService().getObservationsByPersonAndConcept(patient, vl);
-		if (vlObss != null) {
-			vlObs = vlObss;
+		for (Obs obs : vlObss) {
+			KenyaEMRObsWrapper obsw = new KenyaEMRObsWrapper(obs.getObsId(), obs.getConcept(), obs.getObsDatetime(), obs.getValueNumeric());
+			vlObs.add(obsw);
 		}
+
 		// merge vl related obs list
 		if(vlObs.size() > 0) {
 			allVls.addAll(vlObs);
@@ -88,12 +90,13 @@ public class ObsHistoryTableFragmentController {
 			if(!concept.equals(LDLQuestion) && !concept.equals(vl)) {
 				List<Obs> obss = Context.getObsService().getObservationsByPersonAndConcept(patient, concept);
 				for (Obs obs : obss) {
-					data.addObs(obs);
+					KenyaEMRObsWrapper obsw = new KenyaEMRObsWrapper(obs.getObsId(), obs.getConcept(), obs.getObsDatetime(), obs.getValueNumeric());
+					data.addObs(obsw);
 				}
 			}
 		}
 		// add vl obs
-		for (Obs obs : allVls) {
+		for (KenyaEMRObsWrapper obs : allVls) {
 			data.addObs(obs);
 		}
 
@@ -103,7 +106,7 @@ public class ObsHistoryTableFragmentController {
 	/**
 	 * Underlying model for the table data
 	 */
-	public class TableData extends TreeMap<Date, Map<Concept, List<Obs>>> {
+	public class TableData extends TreeMap<Date, Map<Concept, List<KenyaEMRObsWrapper>>> {
 
 		public TableData() {
 			super(new Comparator<Date>() {
@@ -118,18 +121,18 @@ public class ObsHistoryTableFragmentController {
 		 * Adds an obs to the table data
 		 * @param obs the obs
 		 */
-		public void addObs(Obs obs) {
+		public void addObs(KenyaEMRObsWrapper obs) {
 			Concept concept = obs.getConcept();
 			Date dateNoTime = OpenmrsUtil.firstSecondOfDay(obs.getObsDatetime());
 
-			Map<Concept, List<Obs>> allObsDate = get(dateNoTime);
+			Map<Concept, List<KenyaEMRObsWrapper>> allObsDate = get(dateNoTime);
 			if (allObsDate == null) {
-				allObsDate = new HashMap<Concept, List<Obs>>();
+				allObsDate = new HashMap<Concept, List<KenyaEMRObsWrapper>>();
 				put(dateNoTime, allObsDate);
 			}
-			List<Obs> obsForConceptOnDate = allObsDate.get(concept);
+			List<KenyaEMRObsWrapper> obsForConceptOnDate = allObsDate.get(concept);
 			if (obsForConceptOnDate == null) {
-				obsForConceptOnDate = new ArrayList<Obs>();
+				obsForConceptOnDate = new ArrayList<KenyaEMRObsWrapper>();
 				allObsDate.put(concept, obsForConceptOnDate);
 			}
 
