@@ -10,6 +10,7 @@
 
 var obsData = {
 <% concepts.each { concept -> %>
+
 	${ concept.conceptId }: [ <% data[concept].each { obs -> print "[" + obs.obsDatetime.time + ", " + obs.valueNumeric + "], " } %> ],
 <% } %>
 };

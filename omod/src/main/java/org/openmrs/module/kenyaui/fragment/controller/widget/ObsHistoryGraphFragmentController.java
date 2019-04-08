@@ -24,6 +24,7 @@ import org.openmrs.api.AdministrationService;
 import org.openmrs.api.ConceptService;
 import org.openmrs.api.context.Context;
 import org.openmrs.module.kenyaui.KenyaUiUtils;
+import org.openmrs.module.kenyaui.wrapper.KenyaEMRObsWrapper;
 import org.openmrs.ui.framework.annotation.FragmentParam;
 import org.openmrs.ui.framework.annotation.SpringBean;
 import org.openmrs.ui.framework.fragment.FragmentModel;
@@ -52,8 +53,8 @@ public class ObsHistoryGraphFragmentController {
 	 * @param concepts the concepts
 	 * @return the map of concepts to lists of obs
 	 */
-	private Map<Concept, List<Obs>> getObsAsSeries(Person person, List<Concept> concepts) {
-		Map<Concept, List<Obs>> series = new HashMap<Concept, List<Obs>>();
+	private Map<Concept, List<KenyaEMRObsWrapper>> getObsAsSeries(Person person, List<Concept> concepts) {
+		Map<Concept, List<KenyaEMRObsWrapper>> series = new HashMap<Concept, List<KenyaEMRObsWrapper>>();
 		ConceptService service = Context.getConceptService();
 		AdministrationService as = Context.getAdministrationService();
 		Double ldl_default_value = Double.parseDouble(as.getGlobalProperty("kenyaemr.LDL_default_value"));
@@ -65,23 +66,25 @@ public class ObsHistoryGraphFragmentController {
 
 		//get LDL obs
 		//we want to combine all VL obs together while setting LDL value to that of GP (default value for LDL which is numeric)
-		List<Obs> ldlObs = new ArrayList<Obs>();
-		List<Obs> vlObs = new ArrayList<Obs>();
-		List<Obs> allVls = new ArrayList<Obs>();
+		List<KenyaEMRObsWrapper> ldlObs = new ArrayList<KenyaEMRObsWrapper>();
+		List<KenyaEMRObsWrapper> vlObs = new ArrayList<KenyaEMRObsWrapper>();
+		List<KenyaEMRObsWrapper> allVls = new ArrayList<KenyaEMRObsWrapper>();
 		List<Obs> ldl = Context.getObsService().getObservationsByPersonAndConcept(person, LDLQuestion);
+
 		for (Obs obs: ldl) {
-			if (obs.getValueCoded().equals(LDLAnswer)) {
-				obs.setConcept(vl);
-				obs.setValueNumeric(ldl_default_value);
-				ldlObs.add(obs);
+			if (obs.getConcept().equals(LDLQuestion) && obs.getValueCoded().equals(LDLAnswer)) {
+				KenyaEMRObsWrapper obsw = new KenyaEMRObsWrapper(obs.getObsId(), vl, obs.getObsDatetime(), ldl_default_value);
+				ldlObs.add(obsw);
 			}
 		}
 
 		// get ordinary VL obs
 		List<Obs> vlObss =  Context.getObsService().getObservationsByPersonAndConcept(person, vl);
-		if (vlObss != null) {
-			vlObs = vlObss;
+		for (Obs obs : vlObss) {
+			KenyaEMRObsWrapper obsw = new KenyaEMRObsWrapper(obs.getObsId(), obs.getConcept(), obs.getObsDatetime(), obs.getValueNumeric());
+			vlObs.add(obsw);
 		}
+
 		// merge vl related obs list
 		if(vlObs.size() > 0) {
 			allVls.addAll(vlObs);
@@ -94,9 +97,9 @@ public class ObsHistoryGraphFragmentController {
 		//sort VLs
 
 		if (allVls.size() > 1) {
-			Collections.sort(allVls, new Comparator<Obs>() {
+			Collections.sort(allVls, new Comparator<KenyaEMRObsWrapper>() {
 				@Override
-				public int compare(final Obs object1, final Obs object2) {
+				public int compare(final KenyaEMRObsWrapper object1, final KenyaEMRObsWrapper object2) {
 					return object1.getObsDatetime().compareTo(object2.getObsDatetime());
 				}
 			});
@@ -109,7 +112,12 @@ public class ObsHistoryGraphFragmentController {
 		for (Concept concept : concepts) {
 			if(!concept.equals(LDLQuestion) && !concept.equals(vl)) {
 				List<Obs> otherObs = Context.getObsService().getObservationsByPersonAndConcept(person, concept);
-				series.put(concept, otherObs);
+				List<KenyaEMRObsWrapper> l = new ArrayList<KenyaEMRObsWrapper>();
+				for (Obs obs : otherObs) {
+					KenyaEMRObsWrapper obsw = new KenyaEMRObsWrapper(obs.getObsId(), obs.getConcept(), obs.getObsDatetime(), obs.getValueNumeric());
+					l.add(obsw);
+				}
+				series.put(concept, l);
 			}
 		}
 		return series;
