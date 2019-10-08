@@ -32,8 +32,6 @@
 			var OPENMRS_CONTEXT_PATH = '${ contextPath }';
 		</script>
 
-		${ ui.includeFragment("kenyaui", "notifications") }
-
 		<% if (config.beforeContent) { %>
 			${ config.beforeContent }
 		<% } %>
