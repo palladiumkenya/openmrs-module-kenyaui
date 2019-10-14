@@ -244,8 +244,9 @@ public class KenyaUiUtils {
 			 		? ((ConceptNumeric) obs.getConcept())
 					: Context.getConceptService().getConceptNumeric(obs.getConcept().getId());
 
-			String val = numeric.isPrecise() ? String.valueOf(obs.getValueNumeric()) : String.valueOf(obs.getValueNumeric().intValue());
 
+			String val = !numeric.getAllowDecimal() ? String.valueOf(obs.getValueNumeric()) : String.valueOf(obs.getValueNumeric().intValue());
+			
 			if (StringUtils.isNotEmpty(numeric.getUnits())) {
 				val += " " + numeric.getUnits();
 			}
@@ -425,7 +426,7 @@ public class KenyaUiUtils {
 			String units = ((ConceptNumeric) o.getConcept()).getUnits();
 
 			ConceptNumeric cn = (ConceptNumeric) o.getConcept();
-			if (cn.isPrecise() != true) {
+			if (cn.getAllowDecimal() == true) {
 				double d = o.getValueNumeric();
 				int i = (int) d;
 				formattedValue =  Integer.toString(i);
