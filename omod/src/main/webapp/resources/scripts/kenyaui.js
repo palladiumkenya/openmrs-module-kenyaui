@@ -308,6 +308,9 @@ jQuery(function() {
 		kenyaui.openPanelDialog({ heading: options.heading, content: tmpContent, width: options.width, height: options.height });
 
 		$.get(options.url, function(html) {
+			setTimeout(function(){
+				kenyaui.optimizeModalContent();
+			}, 200);
 			$('.ke-modal-content .ke-panel-content').replaceWith(html);
 
 			if (options.scrolling) {
