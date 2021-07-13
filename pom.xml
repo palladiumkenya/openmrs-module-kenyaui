@@ -27,7 +27,7 @@
 	</modules>
 	
 	<properties>
-		<openMRSVersion>2.1.2</openMRSVersion>
+		<openMRSVersion>2.3.3</openMRSVersion>
 
 		<!-- Module dependencies -->
 		<appframeworkVersion>2.13.0</appframeworkVersion>
