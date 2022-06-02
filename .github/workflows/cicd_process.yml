@@ -1,7 +1,7 @@
 name: deploy to prod 8600
 on:
   push:
-    branches: [ openmrs-2.3.3-upgrade ]
+    branches: [ master ]
 jobs:
 
   build:
@@ -19,7 +19,7 @@ jobs:
         script: |
           git config --global --add safe.directory /apps/github-workflows/kenyaemr-modules/openmrs-module-kenyaui      
           cd /apps/github-workflows/kenyaemr-modules/openmrs-module-kenyaui
-          git pull origin openmrs-2.3.3-upgrade
+          git pull origin master
           git status
           mvn clean install -DskipTests
           sudo rm -rf /var/lib/OpenMRS/modules/kenyaui-*.omod
