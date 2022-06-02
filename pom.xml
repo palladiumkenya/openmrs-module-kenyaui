@@ -3,7 +3,7 @@
 
 	<groupId>org.openmrs.module</groupId>
 	<artifactId>kenyaui</artifactId>
-	<version>2.1.2</version>
+	<version>3.0.0</version>
 
 	<packaging>pom</packaging>
 	<name>KenyaUI</name>
@@ -27,11 +27,11 @@
 	</modules>
 	
 	<properties>
-		<openMRSVersion>1.12.0</openMRSVersion>
+		<openMRSVersion>2.3.3</openMRSVersion>
 
 		<!-- Module dependencies -->
-		<appframeworkVersion>2.2.1</appframeworkVersion>
-		<uiframeworkVersion>3.8</uiframeworkVersion>
+		<appframeworkVersion>2.13.0</appframeworkVersion>
+		<uiframeworkVersion>3.15.0</uiframeworkVersion>
 
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 	</properties>
