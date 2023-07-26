@@ -21,7 +21,7 @@ jobs:
           cd /apps/github-workflows/kenyaemr-modules/openmrs-module-kenyaui
           git pull origin master
           git status
-          mvn install -DskipTests
+          sudo mvn clean install -DskipTests
           sudo rm -rf /var/lib/OpenMRS/modules/kenyaui-*.omod
           sudo cp /apps/github-workflows/kenyaemr-modules/openmrs-module-kenyaui/omod/target/kenyaui-*.omod /var/lib/OpenMRS/modules/
           sudo chown -R tomcat:tomcat /var/lib/OpenMRS/modules/
