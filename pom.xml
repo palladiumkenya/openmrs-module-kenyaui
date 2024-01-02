@@ -183,14 +183,14 @@
 
 	<distributionManagement>
 		<repository>
-			<id>openmrs-repo-modules</id>
-			<name>Modules</name>
-			<url>http://mavenrepo.openmrs.org/nexus/content/repositories/modules/</url>
+			<id>mks-nexus</id>
+			<name>Mekom Nexus Releases</name>
+			<url>https://nexus.mekomsolutions.net/releases</url>
 		</repository>
 		<snapshotRepository>
-			<id>openmrs-repo-snapshots</id>
-			<name>OpenMRS Snapshots</name>
-			<url>http://mavenrepo.openmrs.org/nexus/content/repositories/snapshots</url>
+			<id>mks-nexus</id>
+			<name>Mekom Nexus Snapshots</name>
+			<url>https://nexus.mekomsolutions.net/snapshots</url>
 		</snapshotRepository>
 	</distributionManagement>
 
